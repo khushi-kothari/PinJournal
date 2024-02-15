@@ -13,7 +13,7 @@ const breakpointColumnsObj = {
 
 const MasonryLayout = ({ pins }) => (
   <Masonry className="flex animate-slide-fwd gap-1" breakpointCols={breakpointColumnsObj}>
-    {pins?.map((pin) => <Pin key={pin._id} pin={pin} className="w-max" />)}
+    {pins?.map((pin, i) => <Pin key={i} pin={pin} className="w-max" />)}
   </Masonry>
 );
 

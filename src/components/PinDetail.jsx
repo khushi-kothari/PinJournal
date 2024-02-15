@@ -20,23 +20,23 @@ const PinDetail = ({ user }) => {
     if (comment) {
       setAddingComment(true);
 
-      client
-        .patch(pinId)
-        .setIfMissing({ comments: [] })
-        .insert('after', 'comments[-1]', [{
-          comment,
-          _key: uuidv4(),
-          postedBy: {
-            _type: 'postedBy',
-            _ref: user._id
-          }
-        }])
-        .commit()
-        .then(() => {
-          fetchPinDetails();
-          setComment('');
-          setAddingComment(false);
-        });
+      // client
+      //   .patch(pinId)
+      //   .setIfMissing({ comments: [] })
+      //   .insert('after', 'comments[-1]', [{
+      //     comment,
+      //     _key: uuidv4(),
+      //     postedBy: {
+      //       _type: 'postedBy',
+      //       _ref: user._id
+      //     }
+      //   }])
+      //   .commit()
+      //   .then(() => {
+      //     fetchPinDetails();
+      //     setComment('');
+      //     setAddingComment(false);
+      //   });
     }
   }
 
@@ -45,16 +45,16 @@ const PinDetail = ({ user }) => {
     let query = pinDetailQuery(pinId);
 
     if (query) {
-      client.fetch(query)
-        .then((data) => {
-          setPinDetail(data[0]);
+      // client.fetch(query)
+      //   .then((data) => {
+      //     setPinDetail(data[0]);
 
-          if (data[0]) {
-            query = pinDetailMorePinQuery(data[0]);
-            client.fetch(query)
-              .then((res) => setPins(res));
-          }
-        })
+      //     if (data[0]) {
+      //       query = pinDetailMorePinQuery(data[0]);
+      //       client.fetch(query)
+      //         .then((res) => setPins(res));
+      //     }
+      //   })
 
     }
   }

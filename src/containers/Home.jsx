@@ -41,11 +41,11 @@ function Home() {
         scrollRef.current.scrollTo(0, 0)
     }, [])
 
-    useEffect(() => {
-        // if (user) {
-        console.log("Who is logged in?", user);
-        // }
-    }, [user])
+    // useEffect(() => {
+    //     // if (user) {
+    //     console.log("Who is logged in?", user);
+    //     // }
+    // }, [user])
 
     return (
         <div className='flex bg-gray-50 md:flex-row flex-col h-screen transition-height duration-75 ease-out'>

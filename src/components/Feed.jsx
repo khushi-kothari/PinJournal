@@ -13,59 +13,32 @@ const Feed = () => {
   const [loading, setLoading] = useState(false);
   const { categoryId } = useParams();
 
-  const getData = (docRef) => {
-    const usersArray = [];
-    async function asyncall(docRef) {
-      try {
-        const docSnapshot = await getDoc(docRef);
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data();
-          usersArray.push(data);
-        } else {
-          console.log('Document does not exist');
-        }
-      } catch (error) {
-        console.error('Error getting document:', error);
-      }
-    }
-    asyncall(docRef);
-    return usersArray;
-  }
-
-
   useEffect(() => {
     if (categoryId) {
       setLoading(true);
       const collectionRef = collection(db, "Users");
       onSnapshot(collectionRef, (snapshot) => {
-        console.log('Snapshot', snapshot);
-        // setColors(snapshot.docs.map((doc) => doc.data()));
       });
-      // const query = searchQuery(categoryId);
-      // client.fetch(query).then((data) => {
-      //   setPins(data);
-      //   setLoading(false);
-      // }
-      // );
     }
+
     else {
       setLoading(true);
       const unsubscribe = onSnapshot(collection(db, "Pins"), async (snapshot) => {
         const data = snapshot.docs.map((doc) => ({
           ...doc.data(),
         }));
-        console.log(data)
-        // const createdArr = [];
         const updatedData = await Promise.all(data.map(async (d) => {
           const createdDocRef = doc(db, "Users", d.CreatedBy.id)
-          const createdArr = await getData(createdDocRef);
+          const createdArr = (await getDoc(createdDocRef)).data();
           const savedArr = await Promise.all(d.SavedBy.map(async (s) => {
-            const docRef = doc(db, "Users", s.id)
-            return getData(docRef);
+            const docRef = doc(db, "Users", s.id);
+            let data = (await getDoc(docRef)).data();
+            return data;
           }));
           const commentedArr = await Promise.all(d.Comments.map(async (c) => {
             const docRef = doc(db, "Users", c.CommentedBy.id)
-            return getData(docRef);
+            let data = (await getDoc(docRef)).data();
+            return data;
           }));
 
           for (let i = 0; i < commentedArr.length; i++) {
@@ -84,16 +57,11 @@ const Feed = () => {
       // Cleanup function to unsubscribe from the snapshot listener
       return () => unsubscribe();
     }
-    // client.fetch(feedQuery).then((data) => {
-    //   setPins(data);
-    //   setLoading(false);
-    // }
-    // );
   }, [categoryId]);
 
-  useEffect(() => {
-    console.log('Pins', pins);
-  }, [pins])
+  // useEffect(() => {
+  //   console.log('Pins', pins);
+  // }, [pins])
 
 
   const ideaName = categoryId || 'new';
