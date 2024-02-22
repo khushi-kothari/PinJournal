@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AiOutlineCloudUpload } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 import { MdDelete } from 'react-icons/md';
+import { debounce } from 'lodash';
 
 import { categories } from '../utils/data';
 // import { client } from '../client';
@@ -10,6 +11,7 @@ import Spinner from './Spinner';
 const CreatePin = ({ user }) => {
   const [title, setTitle] = useState('');
   const [about, setAbout] = useState('');
+  const [desc, setDesc] = useState('');
   const [loading, setLoading] = useState(false);
   const [destination, setDestination] = useState();
   const [fields, setFields] = useState();
@@ -25,42 +27,42 @@ const CreatePin = ({ user }) => {
       setWrongImageType(false);
       setLoading(true);
 
-      client.assets
-        .upload('image', e.target.files[0], { contentType: type, filename: name })
-        .then((document) => {
-          setImageAsset(document)
-          setLoading(false)
-        })
-        .catch((error) => {
-          console.log("Image upload error ", error);
-        })
+      // client.assets
+      //   .upload('image', e.target.files[0], { contentType: type, filename: name })
+      //   .then((document) => {
+      //     setImageAsset(document)
+      //     setLoading(false)
+      //   })
+      //   .catch((error) => {
+      //     console.log("Image upload error ", error);
+      //   })
     }
     else setWrongImageType(true)
   }
 
   const savePin = () => {
     if (title && about && destination && imageAsset?._id && category) {
-      const doc = {
-        _type: "pin",
-        title,
-        about,
-        destination,
-        image: {
-          _type: "image",
-          asset: {
-            _type: 'reference',
-            _ref: imageAsset?._id,
-          }
-        },
-        userId: user._id,
-        postedBy: {
-          _type: "postedBy",
-          _ref: user._id
-        },
-        category,
-      }
-      client.create(doc)
-        .then(navigate('/'));
+      // const doc = {
+      //   _type: "pin",
+      //   title,
+      //   about,
+      //   destination,
+      //   image: {
+      //     _type: "image",
+      //     asset: {
+      //       _type: 'reference',
+      //       _ref: imageAsset?._id,
+      //     }
+      //   },
+      //   userId: user._id,
+      //   postedBy: {
+      //     _type: "postedBy",
+      //     _ref: user._id
+      //   },
+      //   category,
+      // }
+      // client.create(doc)
+      //   .then(navigate('/'));
     }
     else {
       setFields(true);
@@ -69,6 +71,16 @@ const CreatePin = ({ user }) => {
       }, 2000);
     }
   }
+
+  // Debounce the setDesc function to delay state updates
+  const debouncedSetDesc = debounce((value) => {
+    setDesc(value);
+  }, 300); // Adjust the delay time as needed
+
+  const handleChange = (e) => {
+    const { value } = e.target;
+    debouncedSetDesc(value);
+  };
 
   return (
     <div className="flex flex-col justify-center items-center mt-5 lg:h-4/5">
@@ -139,6 +151,12 @@ const CreatePin = ({ user }) => {
             placeholder="What is your pin about?"
             className='outline-none text-base sm:text-lg border-b-2 border-gray-200 p-2'
           />
+          <textarea
+            // value={desc}
+            onChange={handleChange}
+            placeholder="Add more thoughts..."
+            className='outline-none text-base sm:text-lg border-b-2 border-gray-200 p-2'
+          />
           <input
             type="text"
             value={destination}
@@ -154,8 +172,9 @@ const CreatePin = ({ user }) => {
                 className='outline-none w-4/5 text-base border-b-2 border-gray-200 p-2 rounded-md cursor-pointer'
               >
                 <option value="other" className='bg-white'>Select Category</option>
-                {categories.map((category) => (
+                {categories.map((category, i) => (
                   <option
+                    key={i}
                     className='text-base border-0 outline-none capitalize bg-white text-black'
                     value={category.name}>
                     {category.name}
