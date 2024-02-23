@@ -36,13 +36,20 @@ const UserProfile = () => {
       const q = query(collectionRef, where("id", "==", userId));
       const snapshot = await getDocs(q)
       const results = snapshot.docs.map(doc => ({ ...doc.data() }));
-      console.log(results);
       setUser(results[0]);
     })();
   }, [userId])
 
   useEffect(() => {
     if (text === 'Created') {
+      (async () => {
+        const collectionRef = collection(db, "Pins");
+        const q = query(collectionRef, where("CreatedBy.id", "==", userId));
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(doc => ({ ...doc.data() }));
+        setPins(results);
+      })();
+
       // const createdPinsQuery = userCreatedPinsQuery(userId);
       // client.fetch(createdPinsQuery)
       //   .then((data) => {
@@ -53,6 +60,14 @@ const UserProfile = () => {
       //get created pins of the particular user
     }
     else {
+      (async () => {
+        const collectionRef = collection(db, "Pins");
+        const q = query(collectionRef, where("SavedBy", "==", userId));
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map(doc => ({ ...doc.data() }));
+        setPins(results);
+      })();
+
       // const savedPinsQuery = userSavedPinsQuery(userId);
       //   client.fetch(savedPinsQuery)
       //     .then((data) => {
