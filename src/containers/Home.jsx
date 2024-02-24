@@ -11,7 +11,7 @@ import wlogo from '../assets/Pinasta.png'
 import { userQuery } from '../utils/data';
 import { fetchUser } from '../utils/fetchUser';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import db from '../firestore';
+import { db } from '../firestore';
 
 function Home() {
     const [toggleSidebar, setToggleSidebar] = useState(false);

@@ -6,7 +6,7 @@ import { feedQuery, searchQuery } from '../utils/data';
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
 import { collection, doc, onSnapshot, getDoc } from 'firebase/firestore';
-import db from '../firestore';
+import { db } from '../firestore';
 
 const Feed = () => {
   const [pins, setPins] = useState();

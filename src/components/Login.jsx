@@ -3,7 +3,7 @@ import { GoogleOAuthProvider, GoogleLogin, useGoogleLogin } from '@react-oauth/g
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/pinasta-dark.png'
 import { jwtDecode } from 'jwt-decode'
-import db from '../firestore'
+import { db } from '../firestore'
 import { onSnapshot, collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 function Login() {

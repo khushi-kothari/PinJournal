@@ -8,7 +8,7 @@ import { userCreatedPinsQuery, userQuery, userSavedPinsQuery } from '../utils/da
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
 import { collection, where, query, getDocs, onSnapshot, getDoc, doc } from 'firebase/firestore';
-import db from '../firestore';
+import { db } from '../firestore';
 
 const activeBtnStyles = 'bg-violet-500 text-white font-bold p-2 rounded-full w-20 outline-none';
 const notActiveBtnStyles = 'bg-primary mr-4 text-black font-bold p-2 rounded-full w-20 outline-none';

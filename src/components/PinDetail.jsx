@@ -9,7 +9,7 @@ import MasonryLayout from './MasonryLayout';
 import { pinDetailMorePinQuery, pinDetailQuery } from '../utils/data';
 import Spinner from './Spinner';
 import { collection, doc, getDoc, getDocs, query, where, arrayUnion, updateDoc, Firestore } from 'firebase/firestore';
-import db from '../firestore';
+import { db } from '../firestore';
 
 const PinDetail = ({ user }) => {
   const [pins, setPins] = useState();

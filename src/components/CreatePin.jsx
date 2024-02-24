@@ -5,10 +5,11 @@ import { MdDelete } from 'react-icons/md';
 import { debounce } from 'lodash';
 
 import { categories } from '../utils/data';
-// import { client } from '../client';
 import Spinner from './Spinner';
-import 'firebase/storage';
 import { addDoc, collection, updateDoc } from 'firebase/firestore';
+import { db, storage } from '../firestore'
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+
 
 const CreatePin = ({ user }) => {
   const [title, setTitle] = useState('');
@@ -24,28 +25,31 @@ const CreatePin = ({ user }) => {
   const navigate = useNavigate();
 
   const uploadImg = async (pickedFile) => {
-    // Convert PickedFile to File
-    const file = new File([await pickedFile.readAsArrayBuffer()], pickedFile.name);
-
-    // Step 2: Upload this file to Firebase Storage
-    // Give the image that you want to upload a unique name
-    const imageName = `${Date.now()}.png`;
-
-    // Create Firebase Storage Reference
-    const firebaseStorageRef = firebase.storage().ref().child(`images/${imageName}`);
-
-    // Start uploading image
-    const uploadTask = firebaseStorageRef.put(file);
-    const taskSnapshot = await uploadTask;
-
-    // Get the image URL
-    const fileURL = await taskSnapshot.ref.getDownloadURL();
-
-    // Save this image URL in Cloud Firestore
-    // This will save the image in "images" collection & update the "uploadedImage" value of document with id the same as the value of "id" variable.
-    // await firebase.firestore().collection('images').doc(id).update({ uploadedImage: fileURL });
-    return fileURL;
+    try {
+      const imageName = `${Date.now()}.${pickedFile.type}`;
+      const firebaseStorageRef = ref(storage, `images/${imageName}`);
+      const snapshot = await uploadBytes(firebaseStorageRef, pickedFile);
+      console.log('Uploaded a blob or file!', snapshot);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      console.log('File available at', downloadURL);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
   };
+
+  // const uploadTask = firebaseStorageRef.put(pickedFile);
+  // const taskSnapshot = await uploadTask;
+
+  // Get the image URL
+  // const fileURL = await taskSnapshot.ref.getDownloadURL();
+
+  // Save this image URL in Cloud Firestore
+  // This will save the image in "images" collection & update the "uploadedImage" value of document with id the same as the value of "id" variable.
+  // await firebase.firestore().collection('images').doc(id).update({ uploadedImage: fileURL });
+  // return fileURL;
+  // };
 
 
   const uploadImage = (e) => {
@@ -54,47 +58,56 @@ const CreatePin = ({ user }) => {
       setWrongImageType(false);
       setLoading(true);
       console.log('image file', e.target.files[0])
-      let imgUrl = uploadImg(e.target.files[0]);
-
-      const handleNew = async () => {
-        const collectionRef = collection(db, "Pins");
-        const payload = {
-          Comments: [
-            { Comment: '', CommentedBy: '' }
-          ],
-          CreatedBy: db.doc('Users/' + user.id),
-          Pin: {
-            About: about,
-            Category: category,
-            Description: desc,
-            Title: title,
-            image: imgUrl,
-            url: destination
-          },
-          SavedBy: [''],
-          id: '',
-        };
-        const docRef = await addDoc(collectionRef, payload); //let's save this result
-        console.log(docRef.id);
-        const payload2 = { id: docRef.id };
-        await updateDoc(docRef, payload2);
-      };
-
-      // client.assets
-      //   .upload('image', e.target.files[0], { contentType: type, filename: name })
-      //   .then((document) => {
-      //     setImageAsset(document)
-      //     setLoading(false)
-      //   })
-      //   .catch((error) => {
-      //     console.log("Image upload error ", error);
-      //   })
+      uploadImg(e.target.files[0])
+        .then((imgUrl) => {
+          console.log('Download URL:', imgUrl);
+          setImageAsset(imgUrl);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
     }
     else setWrongImageType(true)
   }
 
+  const handleNew = async () => {
+    const collectionRef = collection(db, "Pins");
+    const payload = {
+      Comments: [
+        { Comment: '', CommentedBy: '' }
+      ],
+      CreatedBy: db.doc('Users/' + user.id),
+      Pin: {
+        About: about,
+        Category: category,
+        Description: desc,
+        Title: title,
+        image: imageAsset,
+        url: destination
+      },
+      SavedBy: [''],
+      id: '',
+    };
+    const docRef = await addDoc(collectionRef, payload); //let's save this result
+    console.log(docRef.id);
+    const payload2 = { id: docRef.id };
+    await updateDoc(docRef, payload2).then(navigate('/'));
+  };
+
+  // client.assets
+  //   .upload('image', e.target.files[0], { contentType: type, filename: name })
+  //   .then((document) => {
+  //     setImageAsset(document)
+  //     setLoading(false)
+  //   })
+  //   .catch((error) => {
+  //     console.log("Image upload error ", error);
+  //   })
+
   const savePin = () => {
-    if (title && about && destination && imageAsset?._id && category) {
+    if (title && about && destination && imageAsset && category) {
+      handleNew();
       // const doc = {
       //   _type: "pin",
       //   title,

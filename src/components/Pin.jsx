@@ -5,7 +5,7 @@ import { MdDownloadForOffline } from 'react-icons/md';
 import { AiTwotoneDelete } from 'react-icons/ai';
 import { BiSolidUser, BiUser } from 'react-icons/bi'
 import { BsFillArrowUpRightCircleFill } from 'react-icons/bs';
-import db from '../firestore';
+import { db } from '../firestore';
 import { arrayUnion, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { saveAs } from 'file-saver'
 
