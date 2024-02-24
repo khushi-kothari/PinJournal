@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { AiOutlineLogout } from 'react-icons/ai';
 import { useParams, useNavigate } from 'react-router-dom';
-// import { GoogleLogout } from 'react-google-login';
 import { googleLogout } from '@react-oauth/google';
 
 import { userCreatedPinsQuery, userQuery, userSavedPinsQuery } from '../utils/data';
 // import { client } from '../client';
 import MasonryLayout from './MasonryLayout';
 import Spinner from './Spinner';
-import { collection, where, query, getDocs } from 'firebase/firestore';
+import { collection, where, query, getDocs, onSnapshot, getDoc, doc } from 'firebase/firestore';
 import db from '../firestore';
 
 const activeBtnStyles = 'bg-violet-500 text-white font-bold p-2 rounded-full w-20 outline-none';
@@ -23,14 +22,42 @@ const UserProfile = () => {
   const [activeBtn, setActiveBtn] = useState('created');
   const navigate = useNavigate();
   const { userId } = useParams();
+  const [allPins, setAllPins] = useState();
+
+  const fetchDetails = async (arr) => {
+    const updatedData = await Promise.all(arr.map(async (d) => {
+      const createdDocRef = doc(db, "Users", d.CreatedBy.id)
+      const createdArr = (await getDoc(createdDocRef)).data();
+      const savedArr = await Promise.all(d.SavedBy.map(async (s) => {
+        const docRef = doc(db, "Users", s.id);
+        let data = (await getDoc(docRef)).data();
+        return data;
+      }));
+      const commentedArr = await Promise.all(d.Comments.map(async (c) => {
+        const docRef = doc(db, "Users", c.CommentedBy.id)
+        let data = (await getDoc(docRef)).data();
+        return data;
+      }));
+
+      for (let i = 0; i < commentedArr.length; i++) {
+        d.Comments[i].CommentedBy = commentedArr[i];
+      }
+
+      return { ...d, CreatedBy: createdArr, SavedBy: savedArr }
+    }));
+    // console.log('updatedData', updatedData)
+    setAllPins(updatedData);
+  }
 
   useEffect(() => {
-    // const query = userQuery(userId);
-    // client.fetch(query)
-    //   .then((data) => {
-    //     setUser(data[0])
-    //   })
-    console.log(userId);
+    const collectionRef = collection(db, "Pins");
+    onSnapshot(collectionRef, (snapshot) => {
+      let arr = snapshot.docs.map((doc) => doc.data());
+      fetchDetails(arr);
+    })
+  }, []);
+
+  useEffect(() => {
     (async () => {
       const collectionRef = collection(db, "Users");
       const q = query(collectionRef, where("id", "==", userId));
@@ -43,40 +70,20 @@ const UserProfile = () => {
   useEffect(() => {
     if (text === 'Created') {
       (async () => {
-        const collectionRef = collection(db, "Pins");
-        const q = query(collectionRef, where("CreatedBy.id", "==", userId));
-        const snapshot = await getDocs(q);
-        const results = snapshot.docs.map(doc => ({ ...doc.data() }));
-        setPins(results);
+        const filteredPins = allPins?.filter(item => item.CreatedBy.id === userId);
+        // console.log("Filterd Created Data", filteredPins)
+        setPins(filteredPins);
       })();
-
-      // const createdPinsQuery = userCreatedPinsQuery(userId);
-      // client.fetch(createdPinsQuery)
-      //   .then((data) => {
-      //     console.log('data', data)
-      //     setPins(data);
-      //   })
-
-      //get created pins of the particular user
     }
     else {
       (async () => {
-        const collectionRef = collection(db, "Pins");
-        const q = query(collectionRef, where("SavedBy", "==", userId));
-        const snapshot = await getDocs(q);
-        const results = snapshot.docs.map(doc => ({ ...doc.data() }));
-        setPins(results);
+        // console.log("All pins", allPins);
+        const filteredPins = allPins?.filter(obj => obj.SavedBy.some(item => item.id === userId));
+        // console.log('filteredPins', filteredPins);
+        setPins(filteredPins);
       })();
-
-      // const savedPinsQuery = userSavedPinsQuery(userId);
-      //   client.fetch(savedPinsQuery)
-      //     .then((data) => {
-      //       setPins(data);
-      //     })
-
-      //get saved pins of the particular user
     }
-  }, [userId, text])
+  }, [userId, text, allPins])
 
 
   const logout = () => {
@@ -131,7 +138,7 @@ const UserProfile = () => {
               Saved
             </button>
           </div>
-          {console.log(pins)}
+          {/* {console.log(pins)} */}
           <div className='px-2'>
             <MasonryLayout pins={pins} />
           </div>
