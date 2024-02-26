@@ -30,24 +30,32 @@ const Feed = () => {
         const updatedData = await Promise.all(data.map(async (d) => {
           const createdDocRef = doc(db, "Users", d.CreatedBy.id)
           const createdArr = (await getDoc(createdDocRef)).data();
-          const savedArr = await Promise.all(d.SavedBy.map(async (s) => {
-            const docRef = doc(db, "Users", s.id);
-            let data = (await getDoc(docRef)).data();
-            return data;
-          }));
-          const commentedArr = await Promise.all(d.Comments.map(async (c) => {
-            const docRef = doc(db, "Users", c.CommentedBy.id)
-            let data = (await getDoc(docRef)).data();
-            return data;
-          }));
 
-          for (let i = 0; i < commentedArr.length; i++) {
-            d.Comments[i].CommentedBy = commentedArr[i];
+          let savedArr;
+          if (d.SavedBy) {
+            savedArr = await Promise.all(d.SavedBy.map(async (s) => {
+              const docRef = doc(db, "Users", s.id);
+              let data = (await getDoc(docRef)).data();
+              return data;
+            }))
           }
 
-          return { ...d, CreatedBy: createdArr, SavedBy: savedArr }
-        }));
+          if (d.Comments) {
+            const commentedArr = await Promise.all(d.Comments.map(async (c) => {
+              const docRef = doc(db, "Users", c.CommentedBy.id)
+              let data = (await getDoc(docRef)).data();
+              return data;
+            }));
 
+            for (let i = 0; i < commentedArr.length; i++) {
+              d.Comments[i].CommentedBy = commentedArr[i];
+            }
+          }
+
+          if (d.SavedBy)
+            return { ...d, CreatedBy: createdArr, SavedBy: savedArr }
+          else return { ...d, CreatedBy: createdArr }
+        }));
 
         setPins(updatedData);
         setLoading(false);

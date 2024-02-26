@@ -6,7 +6,7 @@ import { debounce } from 'lodash';
 
 import { categories } from '../utils/data';
 import Spinner from './Spinner';
-import { addDoc, collection, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '../firestore'
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
@@ -73,11 +73,13 @@ const CreatePin = ({ user }) => {
 
   const handleNew = async () => {
     const collectionRef = collection(db, "Pins");
+    const userDocRef = doc(db, 'Users', user.id);
     const payload = {
-      Comments: [
-        { Comment: '', CommentedBy: '' }
-      ],
-      CreatedBy: db.doc('Users/' + user.id),
+      // Comments: [
+      //   { Comment: '', CommentedBy: '' }
+      // ],
+      CreatedBy: userDocRef,
+      // CreatedBy: db.doc('Users/' + user.id),
       Pin: {
         About: about,
         Category: category,
@@ -86,11 +88,11 @@ const CreatePin = ({ user }) => {
         image: imageAsset,
         url: destination
       },
-      SavedBy: [''],
+      // SavedBy: [''],
       id: '',
     };
     const docRef = await addDoc(collectionRef, payload); //let's save this result
-    console.log(docRef.id);
+    console.log('document uploaded', docRef.id);
     const payload2 = { id: docRef.id };
     await updateDoc(docRef, payload2).then(navigate('/'));
   };
