@@ -14,18 +14,18 @@ const Search = ({ searchTerm }) => {
     if (searchTerm) {
       setLoading(true);
       const query = searchQuery(searchTerm.toLowerCase());
-      client.fetch(query)
-        .then((data) => {
-          setPins(data);
-          setLoading(false);
-        })
+      // client.fetch(query)
+      //   .then((data) => {
+      //     setPins(data);
+      //     setLoading(false);
+      //   })
     }
     else {
-      client.fetch(feedQuery)
-        .then((data) => {
-          setPins(data);
-          setLoading(false);
-        })
+      // client.fetch(feedQuery)
+      //   .then((data) => {
+      //     setPins(data);
+      //     setLoading(false);
+      //   })
     }
 
   }, [searchTerm])

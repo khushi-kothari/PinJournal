@@ -13,11 +13,49 @@ const Feed = () => {
   const [loading, setLoading] = useState(false);
   const { categoryId } = useParams();
 
+  //match title, category, about
   useEffect(() => {
     if (categoryId) {
       setLoading(true);
-      const collectionRef = collection(db, "Users");
-      onSnapshot(collectionRef, (snapshot) => {
+      const unsubscribe = onSnapshot(collection(db, "Pins"), async (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+        }));
+        const updatedData = await Promise.all(data.map(async (d) => {
+          const createdDocRef = doc(db, "Users", d.CreatedBy.id)
+          const createdArr = (await getDoc(createdDocRef)).data();
+
+          let savedArr;
+          if (d.SavedBy) {
+            savedArr = await Promise.all(d.SavedBy.map(async (s) => {
+              const docRef = doc(db, "Users", s.id);
+              let data = (await getDoc(docRef)).data();
+              return data;
+            }))
+          }
+
+          if (d.Comments) {
+            const commentedArr = await Promise.all(d.Comments.map(async (c) => {
+              const docRef = doc(db, "Users", c.CommentedBy.id)
+              let data = (await getDoc(docRef)).data();
+              return data;
+            }));
+
+            for (let i = 0; i < commentedArr.length; i++) {
+              d.Comments[i].CommentedBy = commentedArr[i];
+            }
+          }
+
+          if (d.SavedBy)
+            return { ...d, CreatedBy: createdArr, SavedBy: savedArr }
+          else return { ...d, CreatedBy: createdArr }
+        }));
+
+        let filteredArray = updatedData.filter(obj => obj.Pin && obj.Pin.Category === categoryId);
+
+        console.log(categoryId, filteredArray, updatedData);
+        setPins(filteredArray);
+        setLoading(false);
       });
     }
 
