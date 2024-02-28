@@ -64,11 +64,6 @@ const Search = ({ searchTerm }) => {
     else {
       setPins(allPins);
       setLoading(false);
-      // client.fetch(feedQuery)
-      //   .then((data) => {
-      //     setPins(data);
-      //     setLoading(false);
-      //   })
     }
 
   }, [searchTerm, allPins])

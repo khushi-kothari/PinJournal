@@ -15,7 +15,7 @@ const Pin = ({ pin }) => {
 
   const navigate = useNavigate();
 
-  const { Pin: { image, url }, CreatedBy, id } = pin;
+  const { Pin: { Title, About, Category, image, url, Description }, CreatedBy, id } = pin;
   // console.log(image, url, CreatedBy, id);
 
   const user = localStorage.getItem('user') !== 'undefined' ? JSON.parse(localStorage.getItem('user')) : localStorage.clear();
@@ -68,9 +68,16 @@ const Pin = ({ pin }) => {
         onClick={() => navigate(`/pin-detail/${id}`)}
         className=" relative cursor-zoom-in w-auto hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-500 ease-in-out"
       >
-        {image && (
+        {Description.length > 10 ? (
+          <div className='h-72 bg-zinc-200 text-slate-700 flex flex-col px-4 py-6'
+          >
+            <p className=' font-semibold text-lg'>{Title}</p>
+            <p className='py-3 font-light'>{Description.split(/\s+/).length} words</p>
+            {Description.slice(0, 218) + '...'}
+          </div>
+        ) : (image && (
           <img className="rounded-2xl w-full" src={image} />
-        )}
+        ))}
         {postHovered && (
           <div
             className="absolute top-0 bg-blackOverlay w-full h-full flex flex-col justify-between p-1 pr-2 pt-2 pb-2 z-50"
