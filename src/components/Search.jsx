@@ -50,19 +50,20 @@ const Search = ({ searchTerm }) => {
       }));
       setAllPins(updatedData);
     });
+  }, [])
+
+  useEffect(() => {
     if (searchTerm) {
       setLoading(true);
       //match title, category and about
       const search = searchTerm.toLowerCase();
-      let filteredArray = allPins.filter(obj => obj.Pin && (obj.Pin.Title.includes(search) || obj.Pin.Category === search || obj.Pin.About.includes(search) || obj.Pin.Description.includes(search)));
+      let filteredArray = allPins?.filter(obj => obj.Pin && (obj.Pin.Title.includes(search) || obj.Pin.Category === search || obj.Pin.About.includes(search) || obj.Pin.Description.includes(search)));
       setPins(filteredArray);
       setLoading(false);
     }
     else {
-      //display all pins in desc order
       setPins(allPins);
       setLoading(false);
-
       // client.fetch(feedQuery)
       //   .then((data) => {
       //     setPins(data);
@@ -70,7 +71,7 @@ const Search = ({ searchTerm }) => {
       //   })
     }
 
-  }, [searchTerm])
+  }, [searchTerm, allPins])
 
 
   return (

@@ -12,6 +12,8 @@ const Feed = () => {
   const [pins, setPins] = useState();
   const [loading, setLoading] = useState(false);
   const { categoryId } = useParams();
+  const user = localStorage.getItem('user') !== 'undefined' ? JSON.parse(localStorage.getItem('user')) : localStorage.clear();
+  // console.log(user);
 
   //match title, category, about
   useEffect(() => {
@@ -122,6 +124,7 @@ const Feed = () => {
   if (!pins?.length) return <h1 className='flex items-center justify-center text-center mt-10 leading-loose text-lg text-gray-500 font-medium'>No pins here :( <br /> Add pins to this category to get a beautiful grid!</h1>
 
   return (
+    // {user}
     <div>
       {pins && (
         <MasonryLayout pins={pins} />
