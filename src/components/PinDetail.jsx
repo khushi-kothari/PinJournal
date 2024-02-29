@@ -138,11 +138,11 @@ const PinDetail = ({ user }) => {
         <div className='flex justify-center items-center rounded-sm bg-zinc-200 flex-initial h-[72vh]'>
           <img
             src={pinDetail?.Pin.image}
-            className=''
+            className='max-h-[72vh]'
             alt="user-post" />
         </div>
         <div className='w-full pl-10 pt-5 pr-20 pb-5 flex-1 xl:min-w-620 max-h-[72vh] overflow-scroll'>
-          <div className='flex items-center justify-between py-2 pb-4 border-b'>
+          <div className='flex items-center justify-between py-2 pb-2'>
             <Link to={`/user-profile/${pinDetail.CreatedBy?.id}`} className="flex gap-2 items-center bg-white rounded-lg ">
               <img
                 className="w-8 h-8 rounded-full object-cover"
@@ -151,7 +151,7 @@ const PinDetail = ({ user }) => {
               />
               <p className="font-medium text-slate-800 capitalize">{pinDetail.CreatedBy?.name}</p>
             </Link>
-            {/* <div className='flex gap-2 items-center'>
+            <div className='flex gap-2 items-center'>
               <span
                 onClick={(e) => {
                   e.stopPropagation();
@@ -160,17 +160,17 @@ const PinDetail = ({ user }) => {
                 className="bg-white w-9 h-9 p-2 rounded-full flex items-center justify-center text-dark text-xl opacity-75 hover:opacity-100 hover:shadow-md outline-none"
               ><MdDownloadForOffline />
               </span>
-            </div> */}
-            <a href={pinDetail.Pin.url} target="_blank" rel="noreferrer" className='text-gray-500 w-36 truncate overflow-hidden' >
+            </div>
+            {/* <a href={pinDetail.Pin.url} target="_blank" rel="noreferrer" className='text-gray-500 w-36 truncate overflow-hidden' >
               {pinDetail.Pin.url}
-            </a>
+            </a> */}
           </div>
           <div className='text-slate-800 '>
             <h1 className='text-4xl font-bold break-words mt-4'>{pinDetail.Pin.Title}</h1>
             <p className='my-3 font-semibold text-lg'>{pinDetail.Pin.About}</p>
             <p className='mt-3 text-justify pb-2'>{pinDetail.Pin.Description}</p>
 
-            <h2 className='mt-5 text-xl font-medium border-t pt-4'>Comments</h2>
+            <h2 className='mt-5 text-xl font-medium  pt-2'>Comments</h2>
             <div className='max-h-370 overflow-y-auto'>{pinDetail?.Comments?.map((comment, i) => (
               <div className='flex gap-2 mt-4 items-center  bg-white rounded-lg' key={i}>
                 <img src={comment.CommentedBy.image}

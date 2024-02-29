@@ -68,7 +68,7 @@ const Pin = ({ pin }) => {
         onClick={() => navigate(`/pin-detail/${id}`)}
         className=" relative cursor-zoom-in w-auto hover:shadow-lg rounded-2xl overflow-hidden transition-all duration-500 ease-in-out"
       >
-        {Description.length > 10 ? (
+        {Description.length > 400 ? (
           <div className='h-72 bg-zinc-200 text-slate-700 flex flex-col px-4 py-6'
           >
             <p className=' font-semibold text-lg'>{Title}</p>
