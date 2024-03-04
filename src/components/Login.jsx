@@ -100,10 +100,11 @@ function Login() {
           <div className='p-5'>
             <img src={logo} width='190px' alt="logo" className='opacity-100' />
             <div className='shadow-2xl'>
-              <GoogleOAuthProvider clientId='437821503313-hk5thvt6mjqpdqms5l4h2hsmglod225a.apps.googleusercontent.com' >
+              <GoogleOAuthProvider 
+                {/* clientId='437821503313-hk5thvt6mjqpdqms5l4h2hsmglod225a.apps.googleusercontent.com' > */}
                 {/* <GoogleOAuthProvider
                 clientId='810705148177-cl6vfntk7fhi2uevrpnc2b30g56dlpct.apps.googleusercontent.com'> */}
-                {/* clientId={process.env.REACT_APP_GOOGLE_API_TOKEN} > */}
+                clientId={process.env.REACT_APP_GOOGLE_API_TOKEN} >
                 <GoogleLogin
                   onSuccess={responseGoogle}
                   onError={() => {
