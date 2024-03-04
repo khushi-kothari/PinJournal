@@ -168,7 +168,7 @@ const PinDetail = ({ user }) => {
           <div className='text-slate-800 '>
             <h1 className='text-4xl font-bold break-words mt-4'>{pinDetail.Pin.Title}</h1>
             <p className='my-3 font-semibold text-lg'>{pinDetail.Pin.About}</p>
-            <p className='mt-3 text-justify pb-2'>{pinDetail.Pin.Description}</p>
+            {pinDetail.Pin.Description.length > 0 && <p className='mt-3 text-justify pb-2'>{pinDetail.Pin.Description}</p>}
 
             <h2 className='mt-5 text-xl font-medium  pt-2'>Comments</h2>
             <div className='max-h-370 overflow-y-auto'>{pinDetail?.Comments?.map((comment, i) => (
