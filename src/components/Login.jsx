@@ -7,7 +7,6 @@ import { db } from '../firestore'
 import { onSnapshot, collection, doc, getDoc, setDoc } from "firebase/firestore";
 
 function Login() {
-  console.log('Google API Token:', process.env.REACT_APP_GOOGLE_API_TOKEN);
   const navigate = useNavigate();
 
   const getData = (docRef) => {
@@ -102,7 +101,7 @@ function Login() {
             <img src={logo} width='190px' alt="logo" className='opacity-100' />
             <div className='shadow-2xl'>
               <GoogleOAuthProvider
-                clientId={process.env.REACT_APP_GOOGLE_API_TOKEN} >
+                clientId={import.meta.env.VITE_GOOGLE_API_TOKEN} >
                 <GoogleLogin
                   onSuccess={responseGoogle}
                   onError={() => {
