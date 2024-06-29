@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AiOutlineLogout } from 'react-icons/ai';
 import { useParams, useNavigate } from 'react-router-dom';
 import { googleLogout } from '@react-oauth/google';
+import axios from 'axios';
 
 import { userCreatedPinsQuery, userQuery, userSavedPinsQuery } from '../utils/data';
 // import { client } from '../client';
@@ -13,7 +14,7 @@ import { db } from '../firestore';
 const activeBtnStyles = 'bg-violet-500 text-white font-bold p-2 rounded-full w-20 outline-none';
 const notActiveBtnStyles = 'bg-primary mr-4 text-black font-bold p-2 rounded-full w-20 outline-none';
 
-const randomImage = 'https://source.unsplash.com/1600x900/?nature,wallpaper,technology,aesthetic,ai,painting'
+// const randomImage = 'https://source.unsplash.com/1600x900/?nature,wallpaper,technology,aesthetic,ai,painting'
 
 const UserProfile = () => {
   const [user, setUser] = useState();
@@ -23,36 +24,90 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const { userId } = useParams();
   const [allPins, setAllPins] = useState();
+  const [photo, setPhoto] = useState(null);
+
+  useEffect(() => {
+    const fetchRandomPhoto = async () => {
+      try {
+        const response = await axios.get(`https://api.unsplash.com/photos/random/?client_id=${import.meta.env.VITE_UNSPLASH_CLIENTID}`, {
+        });
+        // console.log('url', response.data)
+        setPhoto(response.data.urls.full);
+      } catch (error) {
+        console.error('There has been a problem with your Axios request:', error);
+      }
+    };
+
+    fetchRandomPhoto();
+  }, []);
 
   const fetchDetails = async (arr) => {
-    const updatedData = await Promise.all(arr.map(async (d) => {
-      const createdDocRef = doc(db, "Users", d.CreatedBy.id)
-      const createdArr = (await getDoc(createdDocRef)).data();
-      const savedArr = await Promise.all(d.SavedBy.map(async (s) => {
-        const docRef = doc(db, "Users", s.id);
-        let data = (await getDoc(docRef)).data();
-        return data;
-      }));
-      const commentedArr = await Promise.all(d.Comments.map(async (c) => {
-        const docRef = doc(db, "Users", c.CommentedBy.id)
-        let data = (await getDoc(docRef)).data();
-        return data;
+    // console.log('arr from inside fetchDetails', arr); // Log the array from inside fetchDetails
+
+    // Check if arr is indeed an array
+    if (!Array.isArray(arr)) {
+      console.error('arr is not an array', arr);
+      return;
+    }
+
+    try {
+      const updatedData = await Promise.all(arr.map(async (d) => {
+        // Guard clauses to check for undefined properties
+        if (!d.CreatedBy || !d.CreatedBy.id) {
+          console.error('CreatedBy or CreatedBy.id is undefined:', d);
+          // return d; // Skip this item or handle it as necessary
+        }
+        if (!Array.isArray(d.SavedBy)) {
+          // console.error('SavedBy is not an array:', d);
+          d.SavedBy = []; // Or handle it as necessary
+        }
+        if (!Array.isArray(d.Comments)) {
+          // console.error('Comments is not an array:', d);
+          d.Comments = []; // Or handle it as necessary
+        }
+
+        const createdDocRef = doc(db, "Users", d.CreatedBy.id);
+        const createdArr = (await getDoc(createdDocRef)).data();
+        const savedArr = await Promise.all(d.SavedBy.map(async (s) => {
+          if (!s.id) {
+            // console.error('SavedBy item has no id:', s);
+            return null; // Or handle it as necessary
+          }
+          const docRef = doc(db, "Users", s.id);
+          let data = (await getDoc(docRef)).data();
+          return data;
+        }));
+        const commentedArr = await Promise.all(d.Comments.map(async (c) => {
+          if (!c.CommentedBy || !c.CommentedBy.id) {
+            console.error('CommentedBy or CommentedBy.id is undefined:', c);
+            return null; // Or handle it as necessary
+          }
+          const docRef = doc(db, "Users", c.CommentedBy.id);
+          let data = (await getDoc(docRef)).data();
+          return data;
+        }));
+
+        for (let i = 0; i < commentedArr.length; i++) {
+          if (commentedArr[i]) {
+            d.Comments[i].CommentedBy = commentedArr[i];
+          }
+        }
+
+        return { ...d, CreatedBy: createdArr, SavedBy: savedArr.filter(Boolean) }; // Filter out any null values
       }));
 
-      for (let i = 0; i < commentedArr.length; i++) {
-        d.Comments[i].CommentedBy = commentedArr[i];
-      }
-
-      return { ...d, CreatedBy: createdArr, SavedBy: savedArr }
-    }));
-    // console.log('updatedData', updatedData)
-    setAllPins(updatedData);
-  }
+      // console.log('updatedData', updatedData); // Log the updated data
+      setAllPins(updatedData);
+    } catch (error) {
+      console.error('Error in fetchDetails:', error); // Log any errors that occur
+    }
+  };
 
   useEffect(() => {
     const collectionRef = collection(db, "Pins");
     onSnapshot(collectionRef, (snapshot) => {
       let arr = snapshot.docs.map((doc) => doc.data());
+      // console.log(arr);
       fetchDetails(arr);
     })
   }, []);
@@ -104,7 +159,8 @@ const UserProfile = () => {
         <div className='relative flex flex-col mb-7'>
           <div className='flex flex-col justify-center items-center'>
             <img
-              src={randomImage}
+              // src={randomImage}
+              src={photo}
               className='w-full h-370 xl:h-510 shadow-lg object-cover'
               alt='banner-pic' />
             <img
@@ -153,3 +209,40 @@ const UserProfile = () => {
 }
 
 export default UserProfile
+
+// const fetchDetails = async (arr) => {
+//   console.log('arr from inside fetchDetails', arr)
+//   if (!Array.isArray(arr)) {
+//     console.error('arr is not an array', arr);
+//     return;
+//   }
+
+//   try {
+//     const updatedData = await Promise.all(arr.map(async (d) => {
+//       const createdDocRef = doc(db, "Users", d.CreatedBy.id)
+//       const createdArr = (await getDoc(createdDocRef)).data();
+//       const savedArr = await Promise.all(d.SavedBy.map(async (s) => {
+//         const docRef = doc(db, "Users", s.id);
+//         let data = (await getDoc(docRef)).data();
+//         return data;
+//       }));
+//       const commentedArr = await Promise.all(d.Comments.map(async (c) => {
+//         const docRef = doc(db, "Users", c.CommentedBy.id)
+//         let data = (await getDoc(docRef)).data();
+//         return data;
+//       }));
+
+//       for (let i = 0; i < commentedArr.length; i++) {
+//         d.Comments[i].CommentedBy = commentedArr[i];
+//       }
+
+//       return { ...d, CreatedBy: createdArr, SavedBy: savedArr }
+//     }));
+//     console.log('updatedData', updatedData)
+//     setAllPins(updatedData);
+//   }
+
+//   catch (error) {
+//     console.error('Error in fetchDetails:', error); // Log any errors that occur
+//   }
+// }
